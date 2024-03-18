@@ -1,76 +1,63 @@
 <?php
 session_start();
-
+include('db_conn.php');
 require_once "./template/header.php";
 
 ?>
 
-<style>
-    /* Styles for customizing the colors */
-    .jumbotron {
-        position: relative;
-        background-image: url('img/logo.jpg'); /* Replace with the path to your pink-colored image */
-        background-size: cover;
-        background-position: top left; /* Change to position the image on the top left corner */
-        color: black; /* Change to the desired text color */
-        text-align: left; /* Align text to the left */
-        padding: 100px 0; /* Adjust padding as needed */
-        height: 800px; /* Set a fixed height for the jumbotron */
-    }
-
-    .overlay-image {
-        position: absolute;
-        bottom: 0;
-        right: 0;
-        width: 50%; /* Adjust the width of the image */
-        z-index: -1;
-        opacity: 0.1; /* Adjust the opacity value as needed (0.0 to 1.0) */
-    }
-
-    h1, p {
-        color: black;
-        /* Change to the desired text color */
-        z-index: 1; /* Ensure text is above the background image */
-    }
-
-    /* Additional styles for better spacing */
-    .team-members {
-        margin-top: 20px;
-    }
-
-    .team-member {
-        margin-bottom: 10px;
-    }
-</style>
+<link rel="stylesheet" href="style.css">
 
 <div class="jumbotron">
-    <img src="img/logo1.png" alt="Overlay Image" class="overlay-image">
+    <div class="container">
+     
+        <h1>Welcome to </h1>
+       <h1> Second Hand Sensations Store</h1>
+        <p>We offer a wide range of high-quality home appliances to make your life easier and more convenient.</p>
+    </div>
+    <div class="overlay-image"></div>
 </div>
-
-<div class="container">
+<div class="thrift-store">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h2>Second Hand Sensations</h2>
+                <p>Discover the joy of sustainable living with Second Hand Sensations, where we sell high-quality second-hand products at unbeatable prices. From furniture to electronics, we have everything you need to furnish your home while reducing your carbon footprint.</p>
+                <p><a href="products.php" class="btn btn-primary">Shop Now</a></p>
+            </div>
+            <div class="col-md-6">
+                <img src="img/logo.jpg" alt="Second Hand Sensations Logo" class="spin" style="width: 300px; height: 300px;">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container team-members">
+    <h1>Our Team Members</h1>
     <div class="row">
-        <div class="col-md-8 col-md-offset-3"> <!-- Center content on medium-sized screens -->
-            <h1>Welcome to Online Thrift Store</h1>
-           
+        <div class="col-md-4">
+            <div class="team-member">
+                <img src="img/sai.jpg" alt="Team Member">
+                <h3>Naga Sai Kumar Kumbha</h3>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="team-member">
+                <img src="img/resh.png" alt="Team Member">
+                <h3>Reshmitha Magannagari</h3>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="col-md-8 col-md-offset-4">
-    <h1>Our Team Members</h1>
-   
-    
-</div>
-<div class="col-md-8 col-md-offset-4">
-        <h3>Nagasaikumar Kumbha</h3>
-    </div>
-    <div class="col-md-8 col-md-offset-4">
-        <h3>Reshmitha Magannagari</h3>
-    </div>
+<script>
+  function spinLogo() {
+    const logo = document.querySelector('.spin');
+    logo.classList.toggle('spin');
+  }
+  setInterval(spinLogo, 2000);
+</script>
 
 <?php
-if (isset($mongoClient)) {
-    $mongoClient->close(); // Close the MongoDB connection
-}
+
+
 require_once "./template/footer.php";
 ?>
