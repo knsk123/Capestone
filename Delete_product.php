@@ -3,6 +3,7 @@ session_start();
 include('db_conn.php');
 include('./template/header.php');
 
+
 $msg = $err = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -27,7 +28,7 @@ $products = $collection->find([], ['projection' => ['Barcode' => 1, 'Title' => 1
 
 ?>
 
-<div class="container mt-5" style="max-width: 500px;">
+<div class="container mt-5" style="max-width: 1000px;">
     <div class="row justify-content-center">
         <div class="col-md-6">
             <!-- Container with form -->
@@ -62,6 +63,8 @@ $products = $collection->find([], ['projection' => ['Barcode' => 1, 'Title' => 1
         </div>
     </div>
 </div>
+<?php
+  require_once './template/footer.php';
+  ?>
 
-<!-- Include the footer template and Bootstrap JS and Popper.js scripts -->
-<?php include('./template/footer.php'); ?>
+
