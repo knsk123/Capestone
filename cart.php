@@ -5,141 +5,163 @@ require_once "./template/header.php";
 
 class CartManager
 {
-  private $db;
+    private $db;
 
-  public function __construct($db)
-  {
-    $this->db = $db;
-  }
-
-  public function removeCartItem($cartId)
-  {
-    $cartCollection = $this->db->cart;
-
-    try {
-      $result = $cartCollection->deleteOne(['_id' => new MongoDB\BSON\ObjectId($cartId)]);
-      if ($result->getDeletedCount() > 0) {
-        return "Record Deleted";
-      } else {
-        return "No record found";
-      }
-    } catch (MongoDB\Driver\Exception\Exception $e) {
-      return "Error: " . $e->getMessage();
+    public function __construct($db)
+    {
+        $this->db = $db;
     }
-  }
 
-  public function placeOrder($userId, $totalPrice, $cartItems)
-  {
-    $curDate = new MongoDB\BSON\UTCDateTime();
-    $orderCollection = $this->db->orderbundle;
-
-    try {
-      $orderDocument = [
-        'Login_Id' => $userId,
-        'Discount' => 0,
-        'ShippingPrice' => 0,
-        'OrderDate' => $curDate,
-        'Status' => 'Placed',
-        'Total' => $totalPrice,
-      ];
-
-      $insertResult = $orderCollection->insertOne($orderDocument);
-
-      if ($insertResult->getInsertedCount() > 0) {
-        $generatedId = $insertResult->getInsertedId();
-        $orderItemsCollection = $this->db->orders;
-
-        foreach ($cartItems as $item) {
-          $orderItemDocument = [
-            'Bundle_Id' => $generatedId,
-            'Product_Id' => $item['product_Id'],
-            'Title' => $item['Title'],
-            'Qty' => $item['Qty'],
-            'UnitPrice' => $item['Price'],
-          ];
-          $orderItemsCollection->insertOne($orderItemDocument);
+    public function removeCartItem($cartId)
+    {
+        $cartCollection = $this->db->cart;
+        $result = $cartCollection->deleteOne(['_id' => new MongoDB\BSON\ObjectId($cartId)]);
+        if ($result->getDeletedCount() > 0) {
+            return "Record Deleted";
+        } else {
+            return "No record found";
         }
-        $this->clearCart($userId);
-        // Don't delete cart items here, we want to keep them in the cart
+    }
+
+    public function placeOrder($userId, $totalPrice, $cartItems)
+    {
+        $curDate = new MongoDB\BSON\UTCDateTime();
+        $orderCollection = $this->db->orderbundle;
+        $orderDocument = [
+            'Login_Id' => $userId,
+            'Discount' => 0,
+            'ShippingPrice' => 0,
+            'OrderDate' => $curDate,
+            'Status' => 'Placed',
+            'Total' => $totalPrice,
+        ];
+        $insertResult = $orderCollection->insertOne($orderDocument);
+        if ($insertResult->getInsertedCount() > 0) {
+            $generatedId = $insertResult->getInsertedId();
+            $orderItemsCollection = $this->db->orders;
+            foreach ($cartItems as $item) {
+                $orderItemDocument = [
+                    'Bundle_Id' => $generatedId,
+                    'Product_Id' => $item['product_Id'],
+                    'Title' => $item['Title'],
+                    'Qty' => $item['Qty'],
+                    'UnitPrice' => $item['Price'],
+                ];
+                $orderItemsCollection->insertOne($orderItemDocument);
+            }
+            return $generatedId; // Return the generated order ID
+        } else {
+            return false;
+        }
+    }
+
+    public function markOrderAsPaid($orderId)
+    {
+        $orderCollection = $this->db->orderbundle;
+        $result = $orderCollection->updateOne(
+            ['_id' => new MongoDB\BSON\ObjectId($orderId)],
+            ['$set' => ['Status' => 'Paid']]
+        );
+        return $result->getModifiedCount() > 0;
+    }
+
+    private function clearCart($userId)
+    {
+        $cartCollection = $this->db->cart;
+        $deleteResult = $cartCollection->deleteMany(['Login_Id' => $userId]);
+        if ($deleteResult->getDeletedCount() === 0) {
+            throw new Exception('Failed to delete cart items for user: ' . $userId);
+        }
         return true;
-      } else {
-        return false;
-      }
-    } catch (MongoDB\Driver\Exception\Exception $e) {
-      return "Error: " . $e->getMessage();
-    }
-    
-  }
-  private function clearCart($userId)
-  {
-    $cartCollection = $this->db->cart;
-
-    try {
-      $deleteResult = $cartCollection->deleteMany(['Login_Id' => $userId]);
-      // Handle potential errors during cart deletion
-      if ($deleteResult->getDeletedCount() === 0) {
-        throw new Exception('Failed to delete cart items for user: ' . $userId);
-      }
-    } catch (Exception $e) {
-      // Log the error or take appropriate action (e.g., notify administrator)
-      error_log('Error clearing cart for user ' . $userId . ': ' . $e->getMessage());
-      return false; // Indicate deletion failure
     }
 
-    return true; // Indicate successful deletion
-  }
+    public function increaseItemQuantity($itemId)
+    {
+        $cartCollection = $this->db->cart;
+        $cartCollection->updateOne(
+            ['_id' => new MongoDB\BSON\ObjectId($itemId)],
+            ['$inc' => ['Qty' => 1]]
+        );
+    }
+
+    public function decreaseItemQuantity($itemId)
+    {
+        $cartCollection = $this->db->cart;
+        $item = $cartCollection->findOne(['_id' => new MongoDB\BSON\ObjectId($itemId)]);
+
+        if ($item['Qty'] > 1) {
+            // Decrease quantity by 1
+            $cartCollection->updateOne(
+                ['_id' => new MongoDB\BSON\ObjectId($itemId)],
+                ['$inc' => ['Qty' => -1]]
+            );
+        } elseif ($item['Qty'] === 1) {
+            // Remove the item from the cart if quantity is 1
+            $this->removeCartItem($itemId);
+        }
+    }
 }
 
 $cartManager = new CartManager($db);
 $orderPlacedMessage = '';
 
 if (!isset($_SESSION['Id'])) {
-  header("Location: login.php");
-  exit();
+    header("Location: login.php");
+    exit();
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-  if (isset($_POST['btnRemove'])) {
-    $cartId = $_POST['btnRemove'];
-    $result = $cartManager->removeCartItem($cartId);
-    $Err = $result;
-  } elseif (isset($_POST['btnPlaceOrder'])) {
-    $userId = $_SESSION['Id'];
-    $totalPrice = $_POST['btnPlaceOrder'];
-
-    $cartCollection = $db->cart; // Change here
-    $cartItems = $cartCollection->find(['Login_Id' => $userId]);
-    $cartItemsArray = []; // Create an array to store cart items
-
-    foreach ($cartItems as $item) {
-      $cartItemsArray[] = $item; // Add each cart item to the array
+    if (isset($_POST['btnRemove'])) {
+        $cartId = $_POST['btnRemove'];
+        $result = $cartManager->removeCartItem($cartId);
+        $Err = $result;
+    } elseif (isset($_POST['btnPlaceOrder'])) {
+        $userId = $_SESSION['Id'];
+        $totalPrice = $_POST['btnPlaceOrder'];
+        $cartCollection = $db->cart;
+        $cartItems = $cartCollection->find(['Login_Id' => $userId]);
+        $cartItemsArray = [];
+        foreach ($cartItems as $item) {
+            $cartItemsArray[] = $item;
+        }
+        $generatedOrderId = $cartManager->placeOrder($userId, $totalPrice, $cartItemsArray);
+        if ($generatedOrderId) {
+            // Redirect to payment gateway after placing order
+            header("Location: paymentgateway.php?order_id=" . $generatedOrderId);
+            exit();
+        } else {
+            $orderPlacedMessage = 'Error placing the order. Please try again.';
+        }
+    } elseif (isset($_POST['btnIncreaseQty'])) {
+        $itemId = $_POST['btnIncreaseQty'];
+        $cartManager->increaseItemQuantity($itemId);
+    } elseif (isset($_POST['btnDecreaseQty'])) {
+        $itemId = $_POST['btnDecreaseQty'];
+        $cartManager->decreaseItemQuantity($itemId);
     }
-
-    $orderPlaced = $cartManager->placeOrder($userId, $totalPrice, $cartItemsArray); // Pass $cartItemsArray to placeOrder
-
-    if ($orderPlaced) {
-      $orderPlacedMessage = 'Order placed successfully!';
-    } else {
-      $orderPlacedMessage = 'Error placing the order. Please try again.';
-    }
-  }
 }
 
 $userId = $_SESSION['Id'];
-$cartCollection = $db->cart; // Change here
+$cartCollection = $db->cart;
 $cartItems = $cartCollection->find(['Login_Id' => $userId]);
-
 $cart = [];
 $total = 0;
-
 foreach ($cartItems as $item) {
-  $price = isset($item['Price']) ? $item['Price'] : 0;
-  $qty = isset($item['Qty']) ? $item['Qty'] : 0;
-  $total += $price * $qty;
-  $cart[] = $item;
+    $price = isset($item['Price']) ? $item['Price'] : 0;
+    $qty = isset($item['Qty']) ? $item['Qty'] : 0;
+    $total += $price * $qty;
+    $cart[] = $item;
 }
-?>
+$totalPrice = 0;
+foreach ($cart as $item) {
+    $price = isset($item['Price']) ? $item['Price'] : 0;
+    $qty = isset($item['Qty']) ? $item['Qty'] : 0;
+    $totalPrice += $price * $qty;
+}
+// Store total price in session
+$_SESSION['totalPrice'] = $totalPrice;
 
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -156,6 +178,34 @@ foreach ($cartItems as $item) {
             width: auto;
             height: auto;
         }
+
+        .table {
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .table th,
+        .table td {
+            border: 1px solid #dee2e6;
+        }
+
+        .table th {
+            background-color: #f8f9fa;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        tbody tr td:last-child {
+            border-right: 0;
+        }
+
+        tbody tr td:first-child {
+            border-left: 0;
+        }
     </style>
 </head>
 
@@ -163,33 +213,48 @@ foreach ($cartItems as $item) {
     <div class="container mt-5">
         <form method="post">
             <h2>Your Cart</h2>
-            <?php foreach ($cart as $item) : ?>
-                <div class="row mt-3">
-                    <div class="col-md-2">
-                        <?php if (isset($item['Image'])) : ?>
-                            <img src="<?php echo $item['Image']; ?>" class="product-image">
-                        <?php endif; ?>
-                    </div>
-                    <div class="col-md-4">
-                        <p><?php echo isset($item['Title']) ? $item['Title'] : ''; ?></p>
-                    </div>
-                    <div class="col-md-2">
-                        <p>Qty: <?php echo isset($item['Qty']) ? $item['Qty'] : ''; ?></p>
-                    </div>
-                    <div class="col-md-2">
-                        <p>Price: $<?php echo isset($item['Price']) ? $item['Price'] : ''; ?></p>
-                    </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-danger" name="btnRemove" value="<?php echo $item['_id']; ?>">Remove</button>
-                    </div>
-                </div>
-            <?php endforeach; ?>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Product</th>
+                        <th scope="col">Quantity</th>
+                        <th scope="col">Price</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($cart as $item) : ?>
+                        <tr>
+                            <td>
+                                <?php if (isset($item['Image'])) : ?>
+                                    <img src="<?php echo $item['Image']; ?>" class="product-image">
+                                <?php endif; ?>
+                                <?php echo isset($item['Title']) ? $item['Title'] : ''; ?>
+                            </td>
+                            <td>
+                                <?php echo isset($item['Qty']) ? $item['Qty'] : ''; ?>
+                                <button type="submit" class="btn btn-success btn-sm" name="btnIncreaseQty" value="<?php echo $item['_id']; ?>">+</button>
+                                <button type="submit" class="btn btn-danger btn-sm" name="btnDecreaseQty" value="<?php echo $item['_id']; ?>">-</button>
+                            </td>
+                            <td>$<?php echo isset($item['Price']) ? $item['Price'] : ''; ?></td>
+                            <td>
+                                <button type="submit" class="btn btn-danger" name="btnRemove" value="<?php echo $item['_id']; ?>">Remove</button>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
             <div class="row mt-3">
                 <div class="col-md-8">
-                    <p>Total Price: $<?php echo $total; ?></p>
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Price</h5>
+                            <p class="card-text" style="font-size: 24px;">$<?php echo $total; ?></p>
+                        </div>
+                    </div>
                 </div>
                 <div class="col-md-4">
-                    <button type="submit" class="btn btn-success" name="btnPlaceOrder" value="<?php echo $total; ?>">Place Order</button>
+                    <button type="submit" class="btn btn-success btn-lg btn-block" name="btnPlaceOrder" value="<?php echo $total; ?>">Place Order</button>
                 </div>
             </div>
             <?php if ($orderPlacedMessage) : ?>
@@ -208,7 +273,3 @@ foreach ($cartItems as $item) {
 </body>
 
 </html>
-
-<?php
-require_once "./template/footer.php";
-?>

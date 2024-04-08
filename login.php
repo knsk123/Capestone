@@ -60,9 +60,43 @@ if (isset($_REQUEST['btnLogin'])) {
 }
 ?>
 
+<style>
+    .form-modal {
+        margin-top: 100px;
+        width: 100%;
+        max-width: 400px;
+        margin: 100px auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        background-color: #f9f9f9;
+    }
 
+    .form-toggle {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
 
-<div class="container" style="max-width: 600px;">
+    .form-toggle button {
+        width: calc(50% - 10px); /* Subtract margins */
+        transition: background-color 0.3s ease, transform 0.3s ease; /* Add transition for animation */
+    }
+
+    .form-toggle button:hover {
+        transform: scale(1.05); /* Add scale on hover for animation */
+    }
+
+    .form-content {
+        display: none;
+    }
+
+    .form-content.active {
+        display: block;
+    }
+</style>
+
+<div class="container">
     <div class="row justify-content-center">
         <div class="col-md-12">
             <div class="form-modal">
@@ -72,7 +106,7 @@ if (isset($_REQUEST['btnLogin'])) {
                 </div>
 
                 <div class="input-group mb-3">
-                    <p style="color: red;">
+                    <p class="error-message">
                         <?php
                         if (isset($Err)) {
                             echo htmlspecialchars($Err);
@@ -82,7 +116,7 @@ if (isset($_REQUEST['btnLogin'])) {
                 </div>
 
                 <div class="input-group mb-3">
-                    <p style="color: green;">
+                    <p class="success-message">
                         <?php
                         if (isset($Msg)) {
                             echo htmlspecialchars($Msg);
@@ -91,7 +125,7 @@ if (isset($_REQUEST['btnLogin'])) {
                     </p>
                 </div>
 
-                <div id="login-form" class="form-content">
+                <div id="login-form" class="form-content active">
                     <form action="Login.php" method="post">
                         <div class="form-group">
                             <label for="loginEmail">Email address</label>
@@ -105,7 +139,7 @@ if (isset($_REQUEST['btnLogin'])) {
                     </form>
                 </div>
 
-                <div id="signup-form" class="form-content" style="display:none;">
+                <div id="signup-form" class="form-content">
                     <form action="Login.php" method="post">
                         <div class="form-group">
                             <label for="registerEmail">Email address</label>

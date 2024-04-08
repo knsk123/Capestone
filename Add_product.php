@@ -100,60 +100,65 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
 
 <body>
 
-    <!-- Your HTML body content goes here -->
-    <div class="container mt-5" style="max-width: 600px;">
+<div class="container mt-5" style="max-width: 600px;">
+    <div class="card">
+      <div class="card-header">
+        <h2>Add New Product</h2>
+      </div>
+      <div class="card-body">
         <form action="" method="post" enctype="multipart/form-data">
-            <h2 class="mb-4">Add New product</h2>
-            <?php if ($msg) : ?>
-                <div class="alert alert-success" role="alert">
-                    <?php echo $msg; ?>
-                </div>
-            <?php endif; ?>
-            <?php if ($err) : ?>
-                <div class="alert alert-danger" role="alert">
-                    <?php echo $err; ?>
-                </div>
-            <?php endif; ?>
-            <div class="form-group">
-                <label for="Id">Id:</label>
-                <input type="text" class="form-control" id="Id" name="Id" required>
+          <?php if ($msg) : ?>
+            <div class="alert alert-success" role="alert">
+              <?php echo $msg; ?>
+          </div>
+          <?php endif; ?>
+          <?php if ($err) : ?>
+            <div class="alert alert-danger" role="alert">
+              <?php echo $err; ?>
             </div>
-            <div class="form-group">
-                <label for="title">Title:</label>
-                <input type="text" class="form-control" id="title" name="title" required>
-            </div>
-            <div class="form-group">
-                <label for="barcode">Barcode:</label>
-                <input type="text" class="form-control" id="barcode" name="barcode" required>
-            </div>
-            <div class="form-group">
-                <label for="category">Category:</label>
-                <input type="text" class="form-control" id="category" name="category" required>
-            </div>
-            <div class="form-group">
-                <label for="brand">Brand:</label>
-                <input type="text" class="form-control" id="brand" name="brand" required>
-            </div>
-            <div class="form-group">
-                <label for="price">Price:</label>
-                <input type="text" class="form-control" id="price" name="price" required>
-            </div>
-            <div class="form-group">
-                <label for="rating">Rating:</label>
-                <input type="text" class="form-control" id="rating" name="rating" required>
-            </div>
-            <div class="form-group">
-                <label for="stock">Stock:</label>
-                <input type="text" class="form-control" id="stock" name="stock" required>
-            </div>
-            <div class="form-group">
-                <label for="Image">Image:</label>
-                <input type="text" class="form-control" name="Image" id="Image" required>
-            </div>
-            <button type="submit" name="submit" class="btn btn-primary">Add product</button>
-        </form>
-    </div>
+          <?php endif; ?>
 
+          <div class="form-group">
+            <label for="Id">Product ID:</label>
+            <input type="text" class="form-control" id="Id" name="Id" required>
+          </div>
+          <div class="form-group">
+            <label for="title">Product Title:</label>
+            <input type="text" class="form-control" id="title" name="title" required>
+          </div>
+          <div class="form-group">
+            <label for="barcode">Product Barcode:</label>
+            <input type="text" class="form-control" id="barcode" name="barcode" required>
+          </div>
+          <div class="form-group">
+            <label for="category">Product Category:</label>
+            <input type="text" class="form-control" id="category" name="category" required>
+          </div>
+          <div class="form-group">
+            <label for="brand">Product Brand:</label>
+            <input type="text" class="form-control" id="brand" name="brand" required>
+          </div>
+          <div class="form-group">
+            <label for="price">Product Price:</label>
+            <input type="number" step="0.01" min="0" class="form-control" id="price" name="price" required>
+          </div>
+          <div class="form-group">
+            <label for="rating">Product Rating (0-5):</label>
+            <input type="number" step="0.1" min="0" max="5" class="form-control" id="rating" name="rating" required>
+          </div>
+          <div class="form-group">
+            <label for="stock">Product Stock:</label>
+            <input type="number" min="0" class="form-control" id="stock" name="stock" required>
+          </div>
+          <div class="form-group">
+            <label for="Image">Product Image URL:</label>
+            <input type="text" class="form-control" id="Image" name="Image" required>
+          </div>
+          <button type="submit" name="submit" class="btn btn-primary">Add Product</button>
+        </form>
+      </div>
+    </div>
+  </div>
     <!-- Bootstrap JS and Popper.js scripts -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.1/dist/umd/popper.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>

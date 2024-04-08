@@ -2,15 +2,35 @@
 session_start();
 
 include('db_conn.php');
-
 require_once './template/header.php';
 ?>
- <link rel="stylesheet" href="style.css">
+
+<style>
+ .card {
+        /* Add transition for smooth animation */
+        transition: transform 0.3s ease;
+    }
+
+    .card {
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card:hover {
+    /* Add transitions for smooth animations */
+    transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+    /* Scale the card up, change the background color and add a shadow on hover */
+    transform: scale(1.05);
+    background-color: #f8f9fa;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+</style>
+
 <?php
 class ProductManager
 {
     private $db;
-    private $cartItems = []; // New array to store cart items
+    private $cartItems = [];
 
     public function __construct($db)
     {
@@ -39,7 +59,6 @@ class ProductManager
                 'Qty' => 1,
                 'Image' => $imageURL
             ]);
-            // Store cart item in array
             $this->cartItems[] = [
                 'Login_Id' => $userId,
                 'product_Id' => $productId,
@@ -84,7 +103,6 @@ class ProductManager
         return $products->toArray();
     }
 
-    // New method to get all cart items
     public function getCartItems()
     {
         return $this->cartItems;
@@ -137,9 +155,9 @@ $products = $productManager->getAvailableProducts($searchTerm, $category);
         <?php endif; ?>
 
         <div class="row">
-            <div class="col-md-12">
-                <select id="categorySelect" class="form-select mb-3" aria-label="Select Product Category">
-                    <option value="">All Categories</option>
+            <div class="col-md-6 mb-4">
+                <select id="categorySelect" class="form-control form-control-lg">
+                    <option selected>All Categories</option>
                     <?php
                     $categories = $productManager->getAllCategories();
                     foreach ($categories as $cat) {
@@ -148,35 +166,33 @@ $products = $productManager->getAvailableProducts($searchTerm, $category);
                     ?>
                 </select>
             </div>
-        </div>
-
-        <div class="row">
             <div class="col-md-6 mb-4">
-                <input type="text" id="searchInput" class="form-control" placeholder="Search by Product Name">
+                <input type="text" id="searchInput" class="form-control form-control-lg" placeholder="Search by Product Name">
             </div>
         </div>
 
         <div id="productList" class="row">
             <?php foreach ($products as $index => $product) { ?>
-                <div class="col-md-3">
+                <div class="col-md-3 m-4">
                     <div class="card h-100 border border-dark shadow" style="border-radius: 10px;">
                         <?php
                         $imageURL = $product['Image'];
                         ?>
-                        <img src="<?php echo $imageURL; ?>" class="card-img-top" style="height: 200px; object-fit: cover; border-top-left-radius: 10px; border-top-right-radius: 10px;" alt="<?php echo $product['Title']; ?>" />
-                        <div class="card-body">
+                            <img src="<?php echo $imageURL; ?>" class="card-img-top" style="height: 200px; object-fit: contain; border-top-left-radius: 10px; border-top-right-radius: 10px; margin-top: 10px;" alt="<?php echo $product['Title']; ?>" />                
+                            <div class="card-body">
                             <h5 class="card-title"><?php echo htmlspecialchars($product['Title']); ?></h5>
                             <p class="card-text"><?php echo htmlspecialchars($product['Category']); ?></p>
                             <p class="card-text">Price: $<?php echo htmlspecialchars($product['Price']); ?></p>
                         </div>
                         <div class="card-footer">
-                            <form method="post">
+                            <form method="post" style="display: inline-block;">
                                 <input type="hidden" name="addToCart" value="<?php echo $product['Id']; ?>">
                                 <input type="hidden" name="barcode" value="<?php echo $product['Barcode']; ?>">
                                 <input type="hidden" name="price" value="<?php echo $product['Price']; ?>">
                                 <input type="hidden" name="imageURL" value="<?php echo $imageURL; ?>">
                                 <input type="hidden" name="title" value="<?php echo $product['Title']; ?>">
-                                <button type="submit" class="btn btn-primary">Add to Cart</button>
+                                <button type="submit" class="btn btn-primary btn-sm mr-2">Add to Cart</button>
+                                <a href="product_details.php?id=<?php echo $product['Id']; ?>" class="btn btn-secondary btn-sm">View Details</a>
                             </form>
                         </div>
                     </div>
@@ -186,7 +202,7 @@ $products = $productManager->getAvailableProducts($searchTerm, $category);
     </div>
 </section>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
 <script>
     $(document).ready(function() {
         $('#searchInput, #categorySelect').on('input change', function() {
@@ -206,8 +222,17 @@ $products = $productManager->getAvailableProducts($searchTerm, $category);
             });
         });
     });
+    
+    anime({
+        targets: '.card',
+        scale: [0.9, 1],
+        duration: 1000,
+        delay: anime.stagger(200),
+        loop: true
+    });
+    $(document).ready(function() {
+        $('.card').click(function() {
+            $(this).toggleClass('selected');
+        });
+    });
 </script>
-
-<?php
-require_once './template/footer.php';
-?>
