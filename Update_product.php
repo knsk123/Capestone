@@ -3,7 +3,7 @@ session_start();
 include('db_conn.php');
 include('./template/header.php');
 
-class product
+class Product
 {
     private $db;
 
@@ -12,7 +12,7 @@ class product
         $this->db = $db;
     }
 
-    public function getproducts()
+    public function getProducts()
     {
         $productCollection = $this->db->product;
         $products = [];
@@ -26,7 +26,7 @@ class product
         return $products;
     }
 
-    public function updateproduct($title, $barcode, $category, $brand, $price, $rating, $stock)
+    public function updateProduct(string $title, string $barcode, string $category, string $brand, float $price, float $rating, int $stock, string $Image, string $description, string $Image2, string $Image3, string $Image4)
     {
         $productCollection = $this->db->product;
 
@@ -38,7 +38,12 @@ class product
                 'Brand' => $brand,
                 'Price' => $price,
                 'Rating' => $rating,
-                'Stock' => $stock
+                'Stock' => $stock,
+                'Image' => $Image,
+                'Description' => $description,
+                'Image2' => $Image2,
+                'Image3' => $Image3,
+                'Image4' => $Image4
             ]]
         );
 
@@ -52,11 +57,11 @@ class product
 
 $msg = $err = "";
 
-// Instantiate the product class
-$productObj = new product($db);
+// Instantiate the Product class
+$productObj = new Product($db);
 
 // Fetch the list of products for the dropdown
-$products = $productObj->getproducts();
+$products = $productObj->getProducts();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $title = $_POST['title'];
@@ -66,8 +71,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $price = $_POST['price'];
     $rating = $_POST['rating'];
     $stock = $_POST['stock'];
+    $Image = $_POST['Image'];
+    $description = $_POST['description'];
+    $Image2 = $_POST['Image2'];
+    $Image3 = $_POST['Image3'];
+    $Image4 = $_POST['Image4'];
 
-    $result = $productObj->updateproduct($title, $barcode, $category, $brand, $price, $rating, $stock);
+    $result = $productObj->updateProduct($title, $barcode, $category, $brand, $price, $rating, $stock, $Image, $description, $Image2, $Image3, $Image4);
 
     if (strpos($result, 'Record updated successfully') !== false) {
         $msg = $result;
@@ -117,15 +127,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
                 <div class="form-group">
                     <label for="price">Price:</label>
-                    <input type="text" class="form-control" id="price" name="price" required>
+                    <input type="number" step="0.01" min="0" class="form-control" id="price" name="price" required>
                 </div>
                 <div class="form-group">
                     <label for="rating">Rating:</label>
-                    <input type="text" class="form-control" id="rating" name="rating" required>
+                    <input type="number" step="0.1" min="0" max="5" class="form-control" id="rating" name="rating" required>
                 </div>
                 <div class="form-group">
                     <label for="stock">Stock:</label>
-                    <input type="text" class="form-control" id="stock" name="stock" required>
+                    <input type="number" min="0" class="form-control" id="stock" name="stock" required>
+                </div>
+                <div class="form-group">
+                    <label for="Image">Product Image URL:</label>
+                    <input type="text" class="form-control" id="Image" name="Image">
+                </div>
+                <div class="form-group">
+                    <label for="description">Product Description:</label>
+                    <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="Image2">Product Image 2 URL:</label>
+                    <input type="text" class="form-control" id="Image2" name="Image2">
+                </div>
+                <div class="form-group">
+                    <label for="Image3">Product Image 3 URL:</label>
+                    <input type="text" class="form-control" id="Image3" name="Image3">
+                </div>
+                <div class="form-group">
+                    <label for="Image4">Product Image 4 URL:</label>
+                    <input type="text" class="form-control" id="Image4" name="Image4">
                 </div>
                 <button type="submit" class="btn btn-primary">Update product</button>
             </form>
@@ -135,3 +165,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <!-- Include the footer template and Bootstrap JS and Popper.js scripts -->
 <?php include('./template/footer.php'); ?>
+
+<script>
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+
+    // Function to handle speech recognition for the given field
+    function startSpeechRecognition(fieldId) {
+        recognition.start();
+        recognition.onresult = function(event) {
+            const speechToText = event.results[0][0].transcript.replace(/\s/g, ''); // Remove spaces
+            document.getElementById(fieldId).value = speechToText;
+        }
+    }
+</script>

@@ -24,6 +24,13 @@ require_once './template/header.php';
     background-color: #f8f9fa;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+    #productList .col-md-3 {
+        flex: 0 0 33.33%;
+        max-width: 33.33%;
+    }
+}
 </style>
 
 <?php
@@ -173,13 +180,13 @@ $products = $productManager->getAvailableProducts($searchTerm, $category);
 
         <div id="productList" class="row">
             <?php foreach ($products as $index => $product) { ?>
-                <div class="col-md-3 m-4">
+                <div class="col-md-3 col-lg-3 col-xl-3 mb-4">
                     <div class="card h-100 border border-dark shadow" style="border-radius: 10px;">
                         <?php
                         $imageURL = $product['Image'];
                         ?>
-                            <img src="<?php echo $imageURL; ?>" class="card-img-top" style="height: 200px; object-fit: contain; border-top-left-radius: 10px; border-top-right-radius: 10px; margin-top: 10px;" alt="<?php echo $product['Title']; ?>" />                
-                            <div class="card-body">
+                        <img src="<?php echo $imageURL; ?>" class="card-img-top" style="height: 200px; object-fit: contain; border-top-left-radius: 10px; border-top-right-radius: 10px; margin-top: 10px;" alt="<?php echo $product['Title']; ?>" />                
+                        <div class="card-body">
                             <h5 class="card-title"><?php echo htmlspecialchars($product['Title']); ?></h5>
                             <p class="card-text"><?php echo htmlspecialchars($product['Category']); ?></p>
                             <p class="card-text">Price: $<?php echo htmlspecialchars($product['Price']); ?></p>
@@ -222,17 +229,13 @@ $products = $productManager->getAvailableProducts($searchTerm, $category);
             });
         });
     });
-    
-    anime({
-        targets: '.card',
-        scale: [0.9, 1],
-        duration: 1000,
-        delay: anime.stagger(200),
-        loop: true
-    });
+
     $(document).ready(function() {
         $('.card').click(function() {
             $(this).toggleClass('selected');
         });
     });
 </script>
+<?php
+require_once './template/footer.php';
+?>

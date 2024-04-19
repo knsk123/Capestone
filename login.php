@@ -129,11 +129,11 @@ if (isset($_REQUEST['btnLogin'])) {
                     <form action="Login.php" method="post">
                         <div class="form-group">
                             <label for="loginEmail">Email address</label>
-                            <input type="email" id="loginEmail" name="loginEmail" class="form-control" placeholder="Enter email" required>
+                            <input type="email" id="loginEmail" name="loginEmail" class="form-control" placeholder="Enter email" required onfocus="startSpeechRecognition('loginEmail')">
                         </div>
                         <div class="form-group">
                             <label for="loginPassword">Password</label>
-                            <input type="password" id="loginPassword" name="loginPassword" class="form-control" placeholder="Enter password" required>
+                            <input type="password" id="loginPassword" name="loginPassword" class="form-control" placeholder="Enter password" required onfocus="startSpeechRecognition('loginPassword')">
                         </div>
                         <button type="submit" class="btn btn-primary" id="btnLogin" name="btnLogin">Log in</button>
                     </form>
@@ -143,15 +143,15 @@ if (isset($_REQUEST['btnLogin'])) {
                     <form action="Login.php" method="post">
                         <div class="form-group">
                             <label for="registerEmail">Email address</label>
-                            <input type="email" id="registerEmail" name="registerEmail" class="form-control" placeholder="Enter email" required>
+                            <input type="email" id="registerEmail" name="registerEmail" class="form-control" placeholder="Enter email" required onfocus="startSpeechRecognition('registerEmail')">
                         </div>
                         <div class="form-group">
                             <label for="registerPassword">Password</label>
-                            <input type="password" id="registerPassword" name="registerPassword" class="form-control" placeholder="Enter password" required>
+                            <input type="password" id="registerPassword" name="registerPassword" class="form-control" placeholder="Enter password" required onfocus="startSpeechRecognition('registerPassword')">
                         </div>
                         <div class="form-group">
                             <label for="registerRepeatPassword">Confirm Password</label>
-                            <input type="password" id="registerRepeatPassword" name="registerRepeatPassword" class="form-control" placeholder="Reenter password" required>
+                            <input type="password" id="registerRepeatPassword" name="registerRepeatPassword" class="form-control" placeholder="Reenter password" required onfocus="startSpeechRecognition('registerRepeatPassword')">
                         </div>
                         <button type="submit" class="btn btn-primary" id="btnSignUp" name="btnSignUp">create account</button>
                         <p>Clicking <strong>create account</strong> means that you agree to our <a href="javascript:void(0)">terms of services</a>.</p>
@@ -166,3 +166,18 @@ if (isset($_REQUEST['btnLogin'])) {
 <?php
 require_once "./template/footer.php";
 ?>
+
+<script>
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+
+    // Function to handle speech recognition for the given field
+    function startSpeechRecognition(fieldId) {
+        recognition.start();
+        recognition.onresult = function(event) {
+            const speechToText = event.results[0][0].transcript.replace(/\s/g, ''); // Remove spaces
+            document.getElementById(fieldId).value = speechToText;
+        }
+    }
+</script>
+

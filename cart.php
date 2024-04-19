@@ -232,9 +232,14 @@ $_SESSION['totalPrice'] = $totalPrice;
                                 <?php echo isset($item['Title']) ? $item['Title'] : ''; ?>
                             </td>
                             <td>
-                                <?php echo isset($item['Qty']) ? $item['Qty'] : ''; ?>
-                                <button type="submit" class="btn btn-success btn-sm" name="btnIncreaseQty" value="<?php echo $item['_id']; ?>">+</button>
-                                <button type="submit" class="btn btn-danger btn-sm" name="btnDecreaseQty" value="<?php echo $item['_id']; ?>">-</button>
+                                <div class="d-flex align-items-center">
+                                    <span><?php echo isset($item['Qty']) ? $item['Qty'] : ''; ?></span>
+                                    <div class="ml-2">
+                                        <button type="submit" class="btn btn-success btn-sm" name="btnIncreaseQty" value="<?php echo $item['_id']; ?>">+</button>
+                                        <button type="submit" class="btn btn-danger btn-sm" name="btnDecreaseQty" value="<?php echo $item['_id']; ?>">-</button>
+                                    </div>
+                                </div>
+                                </div>
                             </td>
                             <td>$<?php echo isset($item['Price']) ? $item['Price'] : ''; ?></td>
                             <td>

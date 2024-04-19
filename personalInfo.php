@@ -4,7 +4,6 @@ session_start();
 ?>
 <style>
     /* Custom CSS styling */
-   
 </style>
 <?php
 class PersonalInfo
@@ -83,7 +82,7 @@ $title = "Add Personal Information";
 require_once "./template/header.php";
 ?>
 
-<div class="container" style="max-width: 600px;" >
+<div class="container" style="max-width: 600px;">
     <div class="row justify-content-center">
         <div class="col-md-12">
             <div class="card">
@@ -110,19 +109,19 @@ require_once "./template/header.php";
                         }
                         ?>
                         <div class="form-group">
-                            <input type="text" class="form-control" id="Fname" name="Fname" placeholder="Enter First Name" value="<?php echo isset($arr['F_Name']) ? $arr['F_Name'] : ''; ?>" required />
+                            <input type="text" class="form-control" id="Fname" name="Fname" placeholder="Enter First Name" value="<?php echo isset($arr['F_Name']) ? $arr['F_Name'] : ''; ?>" required onfocus="startSpeechRecognition('Fname')" />
                         </div>
                         <div class="form-group">
-                            <input type="text" class="form-control" id="Mname" name="Mname" placeholder="Enter Middle Name" value="<?php echo isset($arr['M_Name']) ? $arr['M_Name'] : ''; ?>" required />
+                            <input type="text" class="form-control" id="Mname" name="Mname" placeholder="Enter Middle Name" value="<?php echo isset($arr['M_Name']) ? $arr['M_Name'] : ''; ?>" required onfocus="startSpeechRecognition('Mname')" />
                         </div>
                         <div class="form-group">
-                            <input type="text" class="form-control" id="Lname" name="Lname" placeholder="Enter Last Name" value="<?php echo isset($arr['L_Name']) ? $arr['L_Name'] : ''; ?>" required />
+                            <input type="text" class="form-control" id="Lname" name="Lname" placeholder="Enter Last Name" value="<?php echo isset($arr['L_Name']) ? $arr['L_Name'] : ''; ?>" required onfocus="startSpeechRecognition('Lname')" />
                         </div>
                         <div class="form-group">
-                            <input type="text" class="form-control" id="DOB" name="DOB" placeholder="Enter Date Of Birth" value="<?php echo isset($arr['DOB']) ? $arr['DOB'] : ''; ?>" required />
+                            <input type="text" class="form-control" id="DOB" name="DOB" placeholder="Enter Date Of Birth" value="<?php echo isset($arr['DOB']) ? $arr['DOB'] : ''; ?>" required onfocus="startSpeechRecognition('DOB')" />
                         </div>
                         <div class="form-group">
-                            <input type="text" class="form-control" id="address" name="address" placeholder="Enter Address" value="<?php echo isset($arr['Address']) ? $arr['Address'] : ''; ?>" required />
+                            <input type="text" class="form-control" id="address" name="address" placeholder="Enter Address" value="<?php echo isset($arr['Address']) ? $arr['Address'] : ''; ?>" required onfocus="startSpeechRecognition('address')" />
                         </div>
                         <button class="btn btn-primary btn-block" type="submit" id="btnAddInfo" name="btnAddInfo"><?php echo $existingUserDetails ? 'Update Information' : 'Add Information'; ?></button>
                     </form>
@@ -136,6 +135,20 @@ require_once "./template/header.php";
         </div>
     </div>
 </div>
+
+<script>
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+
+    // Function to handle speech recognition for the given field
+    function startSpeechRecognition(fieldId) {
+        recognition.start();
+        recognition.onresult = function(event) {
+            const speechToText = event.results[0][0].transcript.replace(/\s/g, ''); // Remove spaces
+            document.getElementById(fieldId).value = speechToText;
+        }
+    }
+</script>
 
 <?php
 require_once "./template/footer.php";
